@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 import ProductList from "@/components/ProductList";
 import ProductFilters from "@/components/ProductFilters";
+import ProductGridSkeleton from "@/components/ProductGridSkeleton";
 import { fetchProducts, fetchCategories } from "@/lib/api";
 import { SortOrder } from "@/types/product";
 
-export const dynamic = "force-dynamic";
 export const revalidate = 300;
 
 interface HomePageProps {
@@ -50,15 +50,17 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </aside>
 
           <div className="flex-1">
-            <ProductList
-              key={`${category}-${order}`}
-              initialProducts={productsData.products}
-              total={productsData.total}
-              skip={productsData.skip}
-              limit={productsData.limit}
-              category={category}
-              order={order}
-            />
+            <Suspense fallback={<ProductGridSkeleton />}>
+              <ProductList
+                key={`${category}-${order}`}
+                initialProducts={productsData.products}
+                total={productsData.total}
+                skip={productsData.skip}
+                limit={productsData.limit}
+                category={category}
+                order={order}
+              />
+            </Suspense>
           </div>
         </div>
       </main>

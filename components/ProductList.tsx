@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import ProductCard from "./ProductCard";
+import ProductSkeleton from "./ProductSkeleton";
 import { Product } from "@/types/product";
 
 interface ProductListProps {
@@ -26,6 +27,27 @@ export default function ProductList({
   const [isLoading, startTransition] = useTransition();
   const hasMore = products.length < total;
 
+  const prefetchNextPage = async () => {
+    const newSkip = skip + limit;
+    const params = new URLSearchParams({
+      limit: limit.toString(),
+      skip: newSkip.toString(),
+    });
+
+    if (category && category !== "all") {
+      params.set("category", category);
+    }
+    params.set("order", order);
+
+    fetch(`/api/products?${params.toString()}`);
+  };
+
+  useEffect(() => {
+    if (hasMore) {
+      prefetchNextPage();
+    }
+  }, [category, order]);
+
   const loadMore = async () => {
     const newSkip = skip + limit;
     startTransition(async () => {
@@ -46,6 +68,18 @@ export default function ProductList({
         const data = await response.json();
         setProducts((prev) => [...prev, ...data.products]);
         setSkip(newSkip);
+
+        if (products.length + data.products.length < total) {
+          const nextParams = new URLSearchParams({
+            limit: limit.toString(),
+            skip: (newSkip + limit).toString(),
+          });
+          if (category && category !== "all") {
+            nextParams.set("category", category);
+          }
+          nextParams.set("order", order);
+          fetch(`/api/products?${nextParams.toString()}`);
+        }
       } catch (error) {
         console.error("Error loading more products:", error);
       }
@@ -65,6 +99,10 @@ export default function ProductList({
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
+        {isLoading &&
+          Array.from({ length: 3 }).map((_, i) => (
+            <ProductSkeleton key={`skeleton-${i}`} />
+          ))}
       </div>
 
       {hasMore && (
@@ -81,7 +119,7 @@ export default function ProductList({
         </button>
       )}
 
-      {products.length === 0 && (
+      {products.length === 0 && !isLoading && (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">No products found</p>
         </div>
