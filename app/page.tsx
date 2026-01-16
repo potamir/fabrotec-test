@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import ProductCard from "@/components/ProductCard";
+import ProductList from "@/components/ProductList";
 import ProductFilters from "@/components/ProductFilters";
 import { fetchProducts, fetchCategories } from "@/lib/api";
 import { SortOrder } from "@/types/product";
@@ -24,8 +24,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     fetchCategories(),
   ]);
 
-  console.log(productsData);
-
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm sticky top-0 z-10">
@@ -39,7 +37,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex gap-8">
-          <aside className="w-64 flex-shrink-0">
+          <aside className="w-64 shrink-0">
             <Suspense
               fallback={
                 <div className="bg-white rounded-lg shadow-md p-6">
@@ -52,35 +50,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </aside>
 
           <div className="flex-1">
-            <div className="mb-6 flex items-center justify-between">
-              <p className="text-gray-600">
-                Showing {productsData?.products?.length} products of{" "}
-                {productsData?.total}
-                {category !== "all" && ` in ${category}`}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {productsData.products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-            <button
-              className={`w-full mt-4 py-3 px-6 rounded-lg font-semibold text-white transition-colors 
-              ${
-                productsData?.products?.length === productsData?.total
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }}`}
-              disabled={productsData?.products?.length === productsData?.total}
-            >
-              Show More
-            </button>
-            {productsData.products.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No products found</p>
-              </div>
-            )}
+            <ProductList
+              key={`${category}-${order}`}
+              initialProducts={productsData.products}
+              total={productsData.total}
+              skip={productsData.skip}
+              limit={productsData.limit}
+              category={category}
+              order={order}
+            />
           </div>
         </div>
       </main>

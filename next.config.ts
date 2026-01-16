@@ -4,16 +4,16 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'cdn.dummyjson.com',
-        port: '',
-        pathname: '/product-images/**',
+        protocol: "https",
+        hostname: "cdn.dummyjson.com",
+        port: "",
+        pathname: "/product-images/**",
       },
       {
-        protocol: 'https',
-        hostname: 'cdn.dummyjson.com',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "cdn.dummyjson.com",
+        port: "",
+        pathname: "/**",
       },
     ],
   },
